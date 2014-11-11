@@ -9,8 +9,8 @@ Gem::Specification.new do |gem|
   gem.homepage      = ""
 
   gem.add_dependency 'faraday', '~> 0.8.8'
-  gem.add_dependency 'faraday_middleware', '~> 0.7.0'
-  gem.add_dependency 'faraday-stack', '~> 0.1.3'
+  gem.add_dependency 'faraday_middleware', '>= 0.7.0'
+  gem.add_dependency 'faraday-stack', '>= 0.1.3'
   gem.add_dependency 'yajl-ruby', '~> 1.0'
   gem.add_development_dependency 'rake', '~> 0.9'
   gem.add_development_dependency 'rspec', '~> 2.6'
