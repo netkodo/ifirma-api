@@ -1,11 +1,12 @@
 require 'openssl'
 require 'faraday'
-require 'faraday_stack'
+require 'faraday_middleware'
 require 'yajl'
 
 require 'ifirma/version'
 require 'ifirma/auth_middleware'
 require 'ifirma/response'
+require 'ap'
 
 class Ifirma
   def initialize(options = {})
@@ -26,7 +27,9 @@ class Ifirma
   end
 
   def create_invoice(attrs)
-    response = post("/iapi/fakturakraj.json", normalize_attributes_for_request(attrs))
+    invoice_json = normalize_attributes_for_request(attrs)
+    ap invoice_json
+    response = post("/iapi/fakturakraj.json", invoice_json)
     Response.new(response.body["response"])
   end
 
@@ -40,31 +43,54 @@ class Ifirma
     response
   end
 
+  def get_invoices
+    json_invoice = get("/iapi/fakturakraj/list.json?limit=10")
+    response = Response.new(json_invoice.body["response"])
+    # if response.success?
+    #   response = get("/iapi/fakturakraj/#{invoice_id}.#{type}")
+    #   response = Response.new(response.body)
+    # end
+    response
+  end
+
   ATTRIBUTES_MAP = {
     :paid             => "Zaplacono",
+    :paid_on_document => "ZaplaconoNaDokumencie",
     :type             => "LiczOd",
     :account_no       => "NumerKontaBankowego",
     :issue_date       => "DataWystawienia",
+    :issue_city       => "MiejsceWystawienia",
     :sale_date        => "DataSprzedazy",
     :sale_date_format => "FormatDatySprzedazy",
     :due_date         => "TerminPlatnosci",
     :payment_type     => "SposobZaplaty",
+    :serial_name      => "NazwaSeriiNumeracji",
+    :template_name    => "NazwaSzablonu",
     :designation_type => "RodzajPodpisuOdbiorcy",
+    :customer_signature => "PodpisOdbiorcy",
+    :issuer_signature => "PodpisWystawcy",
+    :comments         => "Uwagi",
     :gios             => "WidocznyNumerGios",
     :number           => "Numer",
-    :full_number      => "PelnyNumer",
     :customer_id      => "IdentyfikatorKontrahenta",
+    :customer_eu_preffix => "PrefiksUEKontrahenta",
     :customer_nip     => "NIPKontrahenta",
     :customer         => {
       :id       => 'Identyfikator',
       :customer => "Kontrahent",
       :name     => "Nazwa",
+      :name2    => "Nazwa2",
+      :eu_preffix => "PrefiksUE",
       :nip      => "NIP",
       :street   => "Ulica",
       :zipcode  => "KodPocztowy",
       :city     => "Miejscowosc",
+      :country  => "Kraj",
       :email    => "Email",
-      :phone    => "Telefon"
+      :phone    => "Telefon",
+      :phisical_person => "OsobaFizyczna",
+      :is_customer => "JestOdbiorca",
+      :is_supplier => "JestDostawca"
     },
     :items => {
       :items    => "Pozycje",
@@ -73,7 +99,9 @@ class Ifirma
       :price    => "CenaJednostkowa",
       :name     => "NazwaPelna",
       :unit     => "Jednostka",
-      :vat_type => "TypStawkiVat"
+      :pkwiu    => "PKWiU",
+      :vat_type => "TypStawkiVat",
+      :discount => "Rabat"
     }
   }
 
@@ -83,7 +111,7 @@ class Ifirma
     :issue_date => DATE_MAPPER,
     :sale_date  => DATE_MAPPER,
     :due_date   => DATE_MAPPER,
-    :account_no => lambda { |value| value.tr(" ", "") },
+    :account_no => lambda { |value| value != nil ? value.tr(" ", "") : value },
     :type => {
       :net   => "NET",
       :gross => "BRT"
@@ -92,7 +120,13 @@ class Ifirma
       :wire        => "PRZ",
       :cash        => "GTK",
       :offset      => "KOM",
-      :on_delivery => "POB"
+      :on_delivery => "POB",
+      :dotpay      => "DOT",
+      :paypal      => "PAL",
+      :electronic  => "ELE",
+      :card        => "KAR",
+      :payu        => "ALG",
+      :cheque      => "CZK"
     },
     :sale_date_format => {
       :daily   => "DZN",
@@ -132,7 +166,6 @@ private
 
   def normalize_attribute(value, mapper)
     return value unless mapper
-
     if mapper.respond_to?(:call)
       mapper.call(value)
     else
@@ -142,10 +175,10 @@ private
 
   def connection
     @connection ||= begin
-      Faraday.new(:url => 'https://www.ifirma.pl/') do |builder|
-        builder.use FaradayStack::ResponseJSON, :content_type => 'application/json'
+      Faraday.new 'https://www.ifirma.pl/' do |builder|
+        builder.use FaradayMiddleware::ParseJson, :content_type => 'application/json'
         builder.use Faraday::Request::UrlEncoded
-        builder.use Faraday::Request::JSON
+        builder.use FaradayMiddleware::EncodeJson
         builder.use Ifirma::AuthMiddleware, :username => @username, :invoices_key => @invoices_key
 #        builder.use Faraday::Response::Logger
         builder.use Faraday::Adapter::NetHttp
