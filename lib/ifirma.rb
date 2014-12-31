@@ -6,7 +6,6 @@ require 'yajl'
 require 'ifirma/version'
 require 'ifirma/auth_middleware'
 require 'ifirma/response'
-require 'ap'
 
 class Ifirma
   def initialize(options = {})
@@ -28,7 +27,6 @@ class Ifirma
 
   def create_invoice(attrs)
     invoice_json = normalize_attributes_for_request(attrs)
-    ap invoice_json
     response = post("/iapi/fakturakraj.json", invoice_json)
     Response.new(response.body["response"])
   end
