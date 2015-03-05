@@ -2,11 +2,11 @@
 require File.expand_path('../lib/ifirma/version', __FILE__)
 
 Gem::Specification.new do |gem|
-  gem.authors       = ["Piotr Sarnacki"]
-  gem.email         = ["drogus@gmail.com"]
+  gem.authors       = ["Jaroslaw Wozniak"]
+  gem.email         = ["info@netkodo.com"]
   gem.description   = %q{API wrapper for ifirma.pl}
   gem.summary       = %q{API wrapper for ifirma.pl}
-  gem.homepage      = ""
+  gem.homepage      = "www.netkodo.com"
 
   gem.add_dependency 'faraday', '~> 0.8.8'
   gem.add_dependency 'faraday_middleware', '>= 0.9.1'
