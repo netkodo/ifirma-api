@@ -12,10 +12,10 @@ Gem::Specification.new do |gem|
   gem.add_dependency 'faraday_middleware', '>= 0.9.1'
   gem.add_dependency 'faraday-stack', '>= 0.1.3'
   gem.add_dependency 'yajl-ruby', '~> 1.0'
-  gem.add_dependency 'nokogiri', '~> 1.5.10'
-  gem.add_development_dependency 'rake', '~> 0.9'
-  gem.add_development_dependency 'rspec', '~> 2.6'
-  gem.add_development_dependency 'webmock', '~> 1.7'
+  gem.add_dependency 'nokogiri', '>= 1.5.10'
+  gem.add_development_dependency 'rake', '>= 0.9'
+  gem.add_development_dependency 'rspec', '>= 2.6'
+  gem.add_development_dependency 'webmock', '>= 1.7'
 
   gem.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   gem.files         = `git ls-files`.split("\n")
