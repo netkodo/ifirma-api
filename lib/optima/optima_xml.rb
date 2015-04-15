@@ -123,9 +123,13 @@ class Optima
       end
     end
 
-    RODZAJ_EKSPORTU = {
-        '' => Baza
-    }
+    # RODZAJ_EKSPORTU = {
+    #     '' => Baza
+    # }
+
+  end
+
+  def get_cdata(value)
 
   end
 end
