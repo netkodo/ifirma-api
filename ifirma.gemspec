@@ -6,7 +6,7 @@ Gem::Specification.new do |gem|
   gem.email         = ["info@netkodo.com"]
   gem.description   = %q{API wrapper for ifirma.pl}
   gem.summary       = %q{API wrapper for ifirma.pl}
-  gem.homepage      = "www.netkodo.com"
+  gem.homepage      = "http://www.netkodo.com"
 
   gem.add_dependency 'faraday', '~> 0.8.8'
   gem.add_dependency 'faraday_middleware', '>= 0.9.1'

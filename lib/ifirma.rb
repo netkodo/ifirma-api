@@ -6,8 +6,10 @@ require 'yajl'
 require 'ifirma/version'
 require 'ifirma/auth_middleware'
 require 'ifirma/response'
+require 'optima'
 
 class Ifirma
+  attr_reader :username, :invoices_key, :key_name
   def initialize(options = {})
     configure(options)
   end
@@ -17,6 +19,7 @@ class Ifirma
 
     @invoices_key = options[:config][:invoices_key]
     @username     = options[:config][:username]
+    @key_name     = options[:config][:key_name] || 'faktura'
   end
 
   [:get, :post, :put, :delete, :head].each do |method|
@@ -49,6 +52,11 @@ class Ifirma
     #   response = Response.new(response.body)
     # end
     response
+  end
+
+  def set_next_month
+    response = put("/iapi/abonent/miesiacksiegowy.json", {"MiesiacKsiegowy" => "NAST", "PrzeniesDaneZPoprzedniegoRoku" => false})
+    Response.new(response.body["response"])
   end
 
   ATTRIBUTES_MAP = {
@@ -177,7 +185,7 @@ private
         builder.use FaradayMiddleware::ParseJson, :content_type => 'application/json'
         builder.use Faraday::Request::UrlEncoded
         builder.use FaradayMiddleware::EncodeJson
-        builder.use Ifirma::AuthMiddleware, :username => @username, :invoices_key => @invoices_key
+        builder.use Ifirma::AuthMiddleware, :username => @username, :invoices_key => @invoices_key, :key_name => @key_name
 #        builder.use Faraday::Response::Logger
         builder.use Faraday::Adapter::NetHttp
       end.tap do |connection|

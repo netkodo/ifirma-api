@@ -1,12 +1,13 @@
 class Ifirma
   class AuthMiddleware < Faraday::Response::Middleware
-    attr_reader :username, :invoices_key
+    attr_reader :username, :invoices_key, :key_name
     def initialize(app = nil, options = {})
       super(app)
       @options = options
 
       @username     = @options.delete(:username)
       @invoices_key = decode_key(@options.delete(:invoices_key))
+      @key_name     = @options.delete(:key_name)
     end
 
     def call(env)
@@ -25,7 +26,7 @@ class Ifirma
 
     def message_hash(env)
       digest       = OpenSSL::Digest.new('sha1')
-      data         = env[:url].to_s.split("?")[0] + username + "faktura" + env[:body].to_s
+      data         = env[:url].to_s.split("?")[0] + username + @key_name + env[:body].to_s
       message_hash = OpenSSL::HMAC.digest(digest, invoices_key, data)
       bin2hex(message_hash)
     end
