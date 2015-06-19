@@ -143,7 +143,7 @@ class Ifirma
         :percent => "PRC",
         :exempt  => "ZW"
       },
-      :vat_rate => lambda { |value| (value.to_f / 100).to_s },
+      :vat_rate => lambda { |value| value.nil? ? nil : (value.to_f / 100).to_s }
     }
   }
 
