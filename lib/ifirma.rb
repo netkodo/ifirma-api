@@ -30,7 +30,7 @@ class Ifirma
 
   def create_invoice(attrs)
     invoice_json = normalize_attributes_for_request(attrs)
-    
+
 
     response = post("/iapi/fakturakraj.json", invoice_json)
     Response.new(response.body["response"])
@@ -57,7 +57,7 @@ class Ifirma
   end
 
   def get_current_month
-    current_month = get("/iapi/abonent/miesiacksiegowy.j)on", {"MiesiacKsiegowy" => false, "PrzeniesDaneZPoprzedniegoRoku" => false})
+    current_month = get("/iapi/abonent/miesiacksiegowy.json", {"MiesiacKsiegowy" => "NAST", "PrzeniesDaneZPoprzedniegoRoku" => false})
     Response.new(current_month.body["response"])
   end
 
