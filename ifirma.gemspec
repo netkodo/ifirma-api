@@ -8,7 +8,7 @@ Gem::Specification.new do |gem|
   gem.summary       = %q{API wrapper for ifirma.pl}
   gem.homepage      = "http://www.netkodo.com"
 
-  gem.add_dependency 'faraday', '~> 0.9.12'
+  gem.add_dependency 'faraday', '~> 0.9.2'
   gem.add_dependency 'faraday_middleware', '>= 0.9.1'
   gem.add_dependency 'faraday-stack', '>= 0.1.3'
   gem.add_dependency 'yajl-ruby', '~> 1.0'
