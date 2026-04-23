@@ -9,11 +9,11 @@ describe 'auth' do
       'Accept-Encoding' => /gzip/,
       'Authentication' => 'IAPIS user=drogus, hmac-sha1=450a7b2125964c117cc411b8940517a4317ceee9',
       'Content-Type' => 'application/json; charset=utf-8',
-      'User-Agent' => 'Ruby'
+      'User-Agent'=>'Faraday v2.14.1'
     }
 
     stub_request(:get, "https://www.ifirma.pl/iapi/foo").
-      with(:headers => headers).to_return(:body => "abc")
+      with(:headers => headers).to_return(status: 200, body: "", headers: {})
 
     ifirma.get("/iapi/foo")
   end

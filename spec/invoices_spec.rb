@@ -79,18 +79,22 @@ describe 'invoices' do
       'Accept' => 'application/json',
       'Authentication' => 'IAPIS user=drogus, hmac-sha1=32fd2bb0d4746c286a0a2cf68f0d224bdc29b9f8',
       'Content-Type' => 'application/json; charset=utf-8',
-      'User-Agent' => 'Ruby'
+      'User-Agent'=>'Faraday v2.14.1'
     }
 
     stub_request(:post, "https://www.ifirma.pl/iapi/fakturakraj.json").
       with(:headers => headers, :body => @encoded_body).
-      to_return(:body=>{"response"=>{"Kod"=>0, "Informacja"=>"Faktura została pomyślnie dodana.", "Identyfikator"=>5721327}})
+      to_return(
+        status: 200,
+        headers: { 'Content-Type' => 'application/json' }, 
+        body: {"response"=>{"Kod"=>0, "Informacja"=>"Faktura została pomyślnie dodana.", "Identyfikator"=>5721327}}.to_json
+      )
 
     response = ifirma.create_invoice(@payload)
-    response.should be_success
-    response.code.should == 0
-    response.info.should == "Faktura została pomyślnie dodana."
-    response.invoice_id.should == 5721327
+    expect(response.success?).to be true
+    expect(response.code).to eq(0)
+    expect(response.info).to eq('Faktura została pomyślnie dodana.')
+    expect(response.invoice_id).to eq(5721327)
   end
 
   it "sends an incorrect invoice" do
@@ -104,60 +108,75 @@ describe 'invoices' do
       'Accept' => 'application/json',
       'Authentication' => 'IAPIS user=drogus, hmac-sha1=a7567c201a87bd5ef4a386408e3387fab1d4231c',
       'Content-Type' => 'application/json; charset=utf-8',
-      'User-Agent' => 'Ruby'
+      'User-Agent'=>'Faraday v2.14.1'
     }
 
     stub_request(:post, "https://www.ifirma.pl/iapi/fakturakraj.json").
       with(:headers => headers, :body => encoded_body).
-      to_return(:body=>{"response"=>{"Kod"=>401, "Informacja"=>"Niepoprawna nazwa użytkownika."}})
+      to_return(
+        status: 200,
+        headers: { 'Content-Type' => 'application/json' }, 
+        body: {"response"=>{"Kod"=>401, "Informacja"=>"Niepoprawna nazwa użytkownika."}}.to_json
+      )
 
     response = ifirma.create_invoice(payload_tmp)
-    response.should be_error
-    response.code.should == 401
-    response.info.should_not be_nil
+    
+    expect(response.code).to eq(401)
+    expect(response.info).to eq('Niepoprawna nazwa użytkownika.')
   end
 
   it "get an innovice" do
-    header = {
-      'Accept' => 'application/json',
-      'Authentication' => 'IAPIS user=drogus, hmac-sha1=a09fb9423c8145e873e603d5df392cd03ac20023',
-      'Content-Type' => 'application/json; charset=utf-8',
-      'User-Agent' => 'Ruby'
-    }
+    headers = {
+       	  'Accept'=>'application/json',
+       	  'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+       	  'Authentication'=>'IAPIS user=drogus, hmac-sha1=854cc130ae59bd398aee15d9b86971e94526484a',
+       	  'Content-Type'=>'application/json; charset=utf-8',
+       	  'User-Agent'=>'Faraday v2.14.1'
+          }
 
     stub_request(:get, "https://www.ifirma.pl/iapi/fakturakraj/5721327.pdf").
-      with(:header => header).
-      to_return(:body => "aaa")
+      with(:headers => headers).
+      to_return(status: 200, headers: {}, :body => "aaa")
 
     stub_request(:get, "https://www.ifirma.pl/iapi/fakturakraj/5721327.json").
-      with(:header => header).
-      to_return(:body => {"response" => {}})
+      with(:headers => headers.merge({
+        'Authentication' => 'IAPIS user=drogus, hmac-sha1=a09fb9423c8145e873e603d5df392cd03ac20023'
+      })).
+      to_return(status: 200, headers: {}, :body => {"response" => {}}.to_json)
 
     response = ifirma.get_invoice(5721327)
-    response.should be_success
-    response.body.should == 'aaa'
+    expect(response.success?).to be true
+    expect(response.body).to eq("aaa")
   end
 
   it "get no exists innovice" do
-    header = {
-      'Accept' => 'application/json',
-      'Authentication' => 'IAPIS user=drogus, hmac-sha1=854cc130ae59bd398aee15d9b86971e94526484a',
-      'Content-Type' => 'application/json; charset=utf-8',
-      'User-Agent' => 'Ruby'
-    }
+    headers = {
+      'Accept'=>'application/json',
+      'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+      'Authentication'=>'IAPIS user=drogus, hmac-sha1=c782e1d21e81daba4a432ea89ead398b8fe246e3',
+      'Content-Type'=>'application/json; charset=utf-8',
+      'User-Agent'=>'Faraday v2.14.1'
+      }
 
     stub_request(:get, "https://www.ifirma.pl/iapi/fakturakraj/0.pdf").
-      with(:header => header).
-      to_return(:body => {"response"=>"aaa"} )
+      with(:headers => headers.merge({
+        'Authentication' => 'IAPIS user=drogus, hmac-sha1=c782e1d21e81daba4a432ea89ead398b8fe246e3'
+      })).
+      to_return(:body => {"response"=>"aaa"}.to_json )
 
     stub_request(:get, "https://www.ifirma.pl/iapi/fakturakraj/0.json").
-      with(:header => header).
-      to_return(:body => {"response"=>{"Kod"=>500, "Informacja"=>"Faktura/rachunek nie istnieje."}})
+      with(:headers => headers).
+      to_return(
+        status: 200,
+        headers: { 'Content-Type' => 'application/json' }, 
+        body: {"response"=>{"Kod"=>500, "Informacja"=>"Faktura/rachunek nie istnieje."}}.to_json
+      )
 
     response = ifirma.get_invoice(0)
-    response.should be_error
-    response.code.should == 500
-    response.info.should_not be_nil
+    expect(response.code).to eq(500)
+    expect(response.info).to eq('Faktura/rachunek nie istnieje.')
   end
 
 end
+
+

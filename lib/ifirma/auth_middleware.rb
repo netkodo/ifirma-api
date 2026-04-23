@@ -1,5 +1,5 @@
 class Ifirma
-  class AuthMiddleware < Faraday::Response::Middleware
+  class AuthMiddleware < Faraday::Middleware
     attr_reader :username, :invoices_key, :key_name
     def initialize(app = nil, options = {})
       super(app)

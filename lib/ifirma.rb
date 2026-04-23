@@ -1,6 +1,5 @@
 require 'openssl'
 require 'faraday'
-require 'faraday_middleware'
 require 'yajl'
 
 require 'ifirma/version'
@@ -189,17 +188,21 @@ private
 
   def connection
     @connection ||= begin
-      Faraday.new 'https://www.ifirma.pl/' do |builder|
-        builder.use FaradayMiddleware::ParseJson, :content_type => 'application/json'
-        builder.use Faraday::Request::UrlEncoded
-        builder.use FaradayMiddleware::EncodeJson
-        builder.use Ifirma::AuthMiddleware, :username => @username, :invoices_key => @invoices_key, :key_name => @key_name
-#        builder.use Faraday::Response::Logger
-        builder.use Faraday::Adapter::NetHttp
-      end.tap do |connection|
-        connection.headers["Content-Type"] = "application/json; charset=utf-8"
-        connection.headers["Accept"]       = "application/json"
+      conn = Faraday.new(url: 'https://www.ifirma.pl/') do |builder|
+        builder.request :json
+        builder.request :url_encoded
 
+        builder.use Ifirma::AuthMiddleware,
+                    username: @username,
+                    invoices_key: @invoices_key,
+                    key_name: @key_name
+
+        builder.response :json, content_type: /\bjson$/
+
+        builder.headers["Content-Type"] = "application/json; charset=utf-8"
+        builder.headers["Accept"]       = "application/json"
+
+        builder.adapter :net_http
       end
     end
   end
