@@ -84,6 +84,7 @@ class Ifirma
     :issuer_signature => "PodpisWystawcy",
     :comments         => "Uwagi",
     :gios             => "WidocznyNumerGios",
+    :bdo              => "WidocznyNumerBdo",
     :number           => "Numer",
     :customer_id      => "IdentyfikatorKontrahenta",
     :customer_eu_preffix => "PrefiksUEKontrahenta",
@@ -139,11 +140,21 @@ class Ifirma
       :electronic  => "ELE",
       :card        => "KAR",
       :payu        => "ALG",
-      :cheque      => "CZK"
+      :cheque      => "CZK",
+      :barter      => "BAR",
+      :p24         => "P24",
+      :tpay        => "TPA",
+      :pza         => "PZA",
     },
     :sale_date_format => {
       :daily   => "DZN",
       :monthly => "MSC"
+    },
+    :designation_type => {
+      :reveiceVAT => "OUP"
+      :auth => "UPO"
+      :withoutRecipier => "BPO"
+      :withoutRecipientIssuer => "BWO"
     },
     :items => {
       :vat_type => {
