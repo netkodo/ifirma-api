@@ -151,9 +151,9 @@ class Ifirma
       :monthly => "MSC"
     },
     :designation_type => {
-      :reveiceVAT => "OUP"
-      :auth => "UPO"
-      :withoutRecipier => "BPO"
+      :reveiceVAT => "OUP",
+      :auth => "UPO",
+      :withoutRecipier => "BPO",
       :withoutRecipientIssuer => "BWO"
     },
     :items => {
@@ -161,7 +161,7 @@ class Ifirma
         :percent => "PRC",
         :exempt  => "ZW"
       },
-      :vat_rate => lambda { |value| value.nil? ? nil : (value.to_f / 100).to_s }
+      :vat_rate => lambda { |value| value.nil? ? nil : (value.to_f / 100) }
     }
   }
 
